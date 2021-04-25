@@ -1,10 +1,13 @@
 package controllers
 
 import (
+    "log"
     "net/http"
+    "reflect"
     "github.com/gin-gonic/gin"
     "github.com/stewbawka/go-auth/database"
     "github.com/stewbawka/go-auth/models"
+	"github.com/go-playground/validator/v10"
 )
 
 
@@ -29,16 +32,25 @@ type CreateUserSchema struct {
     Email string `json:"email" binding:"required"`
     FirstName string `json:"first_name" binding:"required"`
     LastName string `json:"last_name" binding:"required"`
+    Password string `json:"password" binding:"required"`
 }
 
 func CreateUser(c *gin.Context) {
     var data CreateUserSchema
+	log.Print("Logging in Go!")
     if err := c.ShouldBindJSON(&data); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
+        e := make(map[string]string)
+        errors, _ := err.(validator.ValidationErrors)
+        for _, fe := range errors {
+            field, _ := reflect.TypeOf(&data).Elem().FieldByName(fe.Field())
+            e[field.Tag.Get("json")] = fe.Tag()
+        }
+        c.JSON(http.StatusBadRequest, gin.H{"errors": e})
+		return
+
     }
 
-    user := models.User{Email: data.Email, FirstName: data.FirstName, LastName: data.LastName}
+    user := models.User{Email: data.Email, FirstName: data.FirstName, LastName: data.LastName, Password: data.Password}
     database.DBConn.Create(&user)
 
     c.JSON(http.StatusCreated, gin.H{"data": user})
