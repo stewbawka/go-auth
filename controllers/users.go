@@ -1,7 +1,6 @@
 package controllers
 
 import (
-    "log"
     "net/http"
     "reflect"
     "github.com/gin-gonic/gin"
@@ -37,7 +36,6 @@ type CreateUserSchema struct {
 
 func CreateUser(c *gin.Context) {
     var data CreateUserSchema
-	log.Print("Logging in Go!")
     if err := c.ShouldBindJSON(&data); err != nil {
         e := make(map[string]string)
         errors, _ := err.(validator.ValidationErrors)

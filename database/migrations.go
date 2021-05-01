@@ -6,4 +6,5 @@ import (
 
 func Migrate() {
     DBConn.AutoMigrate(models.User{})
+    DBConn.AutoMigrate(models.Token{})
 }

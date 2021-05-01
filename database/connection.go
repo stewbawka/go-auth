@@ -7,7 +7,6 @@ import (
 
 var (
     DBConn *gorm.DB
-
 )
 
 func Connect() {

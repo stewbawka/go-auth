@@ -17,6 +17,8 @@ func main() {
     r.PATCH("/users/:id", controllers.UpdateUser)
     r.DELETE("/users/:id", controllers.DeleteUser)
 
+    r.POST("/tokens", controllers.CreateToken)
+
     r.Run()
 }
 
