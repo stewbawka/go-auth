@@ -25,7 +25,6 @@ func CreateToken(c *gin.Context) {
         }
         c.JSON(http.StatusBadRequest, gin.H{"errors": e})
 		return
-
     }
 
     var user models.User
