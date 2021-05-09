@@ -3,6 +3,7 @@ package jwt
 import (
     "fmt"
     "io/ioutil"
+    "github.com/lestrrat-go/jwx/jwk"
 )
 
 type Keypair struct {
@@ -12,6 +13,7 @@ type Keypair struct {
 
 var (
     JWTKeypair *Keypair
+    Jwks *jwk.Key
 )
 
 func LoadKeypair(path string) {
@@ -27,4 +29,19 @@ func LoadKeypair(path string) {
 
     keypair := Keypair{privateKey: privateKey, publicKey: publicKey}
     JWTKeypair = &keypair
+    GetPublicJwks()
 }
+
+func GetPublicJwks() () {
+    set, err := jwk.New(JWTKeypair.publicKey)
+    if err != nil {
+        panic(err.Error())
+    }
+
+    err = jwk.AssignKeyID(set)
+    if err != nil {
+        panic(err.Error())
+    }
+    Jwks = &set
+}
+

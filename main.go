@@ -14,6 +14,8 @@ func main() {
 
     r := gin.Default()
 
+    r.GET("/jwks", controllers.GetJwks)
+
     r.GET("/users", controllers.FindUsers)
     r.GET("/users/:id", controllers.FindUser)
     r.POST("/users", controllers.CreateUser)
