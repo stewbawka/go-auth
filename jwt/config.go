@@ -4,6 +4,9 @@ import (
     "fmt"
     "io/ioutil"
     "github.com/lestrrat-go/jwx/jwk"
+    "encoding/pem"
+    "crypto/x509"
+    "errors"
 )
 
 type Keypair struct {
@@ -11,9 +14,14 @@ type Keypair struct {
     publicKey []byte
 }
 
+type JWKeys struct {
+    Keys [1]jwk.Key `json:"keys"`
+}
+
 var (
     JWTKeypair *Keypair
-    Jwks *jwk.Key
+    Jwks *JWKeys
+    JwkKid string
 )
 
 func LoadKeypair(path string) {
@@ -33,7 +41,17 @@ func LoadKeypair(path string) {
 }
 
 func GetPublicJwks() () {
-    set, err := jwk.New(JWTKeypair.publicKey)
+    block, _ := pem.Decode([]byte(JWTKeypair.publicKey))
+    if block == nil {
+        panic(errors.New("failed to parse PEM block containing the key"))
+    }
+
+    pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+    if err != nil {
+        panic(err.Error())
+    }
+
+    set, err := jwk.New(pub)
     if err != nil {
         panic(err.Error())
     }
@@ -42,6 +60,8 @@ func GetPublicJwks() () {
     if err != nil {
         panic(err.Error())
     }
-    Jwks = &set
+    keysArr := [1]jwk.Key{set}
+    JwkKid = set.KeyID()
+    Jwks = &JWKeys{Keys: keysArr}
 }
 
