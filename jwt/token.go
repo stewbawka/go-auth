@@ -5,7 +5,7 @@ import (
     "github.com/dgrijalva/jwt-go"
 )
 
-func CreateToken(ttl time.Duration, data interface{}) (string, error) {
+func CreateToken(subject string, ttl time.Duration, data interface{}) (string, error) {
     key, err := jwt.ParseRSAPrivateKeyFromPEM(JWTKeypair.privateKey)
     if err != nil {
         return "", err
@@ -18,7 +18,8 @@ func CreateToken(ttl time.Duration, data interface{}) (string, error) {
     claims["exp"] = now.Add(ttl).Unix()
     claims["iat"] = now.Unix()
     claims["nbf"] = now.Unix()
-    claims["iss"] = "testing@secure.istio.io"
+    claims["iss"] = "go-auth"
+    claims["sub"] = subject
 
 
     token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

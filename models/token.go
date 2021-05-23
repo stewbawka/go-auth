@@ -25,6 +25,6 @@ func (t *Token) BeforeSave(tx *gorm.DB) (err error) {
     if err != nil {
         return err
     }
-    t.Token, err = jwt.CreateToken(TokenTTL, string(payload))
+    t.Token, err = jwt.CreateToken(t.User.Email, TokenTTL, string(payload))
     return err
 }
