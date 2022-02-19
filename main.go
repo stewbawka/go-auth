@@ -9,6 +9,7 @@ import (
 
 func main() {
     database.Connect()
+    defer database.Close()
     database.Migrate()
     jwt.LoadKeypair("/jwt-keypairs")
 
@@ -23,6 +24,7 @@ func main() {
     r.DELETE("/users/:id", controllers.DeleteUser)
 
     r.POST("/tokens", controllers.CreateToken)
+    r.GET("/tokens/me", controllers.GetTokenByCookie)
 
     r.Run()
 }

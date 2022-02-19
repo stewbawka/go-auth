@@ -44,3 +44,17 @@ func CreateToken(c *gin.Context) {
     c.SetCookie("token", token.Token, 60*60*24, "/", "localhost", true, true)
     c.JSON(http.StatusCreated, gin.H{"data": token})
 }
+
+func GetTokenByCookie(c *gin.Context) {
+    tokenString, err := c.Cookie("token")
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token unauthorized!"})
+        return
+    }
+    var token models.Token
+    if err := database.DBConn.Where("token = ?", tokenString).Joins("User").First(&token).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token unauthorized!"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{"data": token})
+}

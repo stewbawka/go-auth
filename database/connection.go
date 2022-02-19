@@ -15,6 +15,13 @@ func Connect() {
     if err != nil {
         panic(err.Error())
     }
-
     DBConn = db
+}
+
+func Close() {
+	sqlDB, err := DBConn.DB()
+	if err != nil {
+        panic(err.Error())
+	}
+	sqlDB.Close()
 }
