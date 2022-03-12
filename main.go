@@ -25,6 +25,7 @@ func main() {
 
     r.POST("/tokens", controllers.CreateToken)
     r.GET("/tokens/me", controllers.GetTokenByCookie)
+    r.POST("/tokens/invalidate", controllers.InvalidateTokenByCookie)
 
     r.Run()
 }

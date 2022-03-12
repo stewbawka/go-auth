@@ -16,6 +16,7 @@ type Token struct {
     UserID int `json:"user_id"`
     User User `json:"user"`
     Token string `json:"token"`
+    InvalidatedAt time.Time `json:"invalidated_at" gorm:"default:null"`
     CreatedAt    time.Time `json:"created_at"`
     UpdatedAt    time.Time `json:"updated_at"`
 }
