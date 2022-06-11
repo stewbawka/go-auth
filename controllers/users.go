@@ -55,9 +55,8 @@ func CreateUser(c *gin.Context) {
 }
 
 type UpdateUserSchema struct {
-    Email string `json:"email"`
-    FirstName string `json:"first_name"`
-    LastName string `json:"last_name"`
+    FirstName *string `json:"first_name" binding:"omitempty,min=1"`
+    LastName *string `json:"last_name" binding:"omitempty,min=1"`
 }
 
 func UpdateUser(c *gin.Context) {
@@ -68,11 +67,24 @@ func UpdateUser(c *gin.Context) {
     }
     var data UpdateUserSchema
     if err := c.ShouldBindJSON(&data); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        e := make(map[string]string)
+        errors, _ := err.(validator.ValidationErrors)
+        for _, fe := range errors {
+            field, _ := reflect.TypeOf(&data).Elem().FieldByName(fe.Field())
+            e[field.Tag.Get("json")] = fe.Tag()
+        }
+        c.JSON(http.StatusBadRequest, gin.H{"errors": e})
         return
     }
 
-    database.DBConn.Model(&user).Updates(models.User{Email: data.Email, FirstName: data.FirstName, LastName: data.LastName})
+    var updateUser models.User
+    if (data.FirstName != nil) {
+        updateUser.FirstName = *data.FirstName
+    }
+    if (data.LastName != nil) {
+        updateUser.LastName = *data.LastName
+    }
+    database.DBConn.Model(&user).Updates(updateUser)
 
     c.JSON(http.StatusOK, gin.H{"data": user})
 }
