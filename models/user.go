@@ -7,9 +7,11 @@ import (
     "crypto/rand"
     "encoding/base64"
     "golang.org/x/crypto/argon2"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
     "errors"
     "strings"
     "crypto/subtle"
+    "github.com/stewbawka/go-auth/protobufs"
 )
 
 var (
@@ -43,6 +45,19 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
             return err
         }
     }
+    return
+}
+
+func (u *User) AfterSave(tx *gorm.DB) (err error) {
+    protobuf := &protobufs.User{
+        Id: uint32(u.ID),
+        FirstName: u.FirstName,
+        LastName: u.LastName,
+        CreatedAt: timestamppb.Now(),
+        UpdatedAt: timestamppb.Now(),
+    }
+    fmt.Println(protobuf)
+
     return
 }
 

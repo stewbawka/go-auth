@@ -1,6 +1,7 @@
 package controllers
 
 import (
+    "fmt"
     "net/http"
     "reflect"
     "github.com/gin-gonic/gin"
@@ -60,6 +61,12 @@ type UpdateUserSchema struct {
 }
 
 func UpdateUser(c *gin.Context) {
+    fmt.Println("*************")
+    fmt.Println(c.Request.Header["Authorization"])
+    fmt.Println("*************")
+    fmt.Println("*************")
+    fmt.Println(c.Request.Header["x-jwt"])
+    fmt.Println("*************")
     var user models.User
     if err := database.DBConn.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
