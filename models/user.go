@@ -8,10 +8,13 @@ import (
     "encoding/base64"
     "golang.org/x/crypto/argon2"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/proto"
     "errors"
+    "github.com/Shopify/sarama"
     "strings"
     "crypto/subtle"
     "github.com/stewbawka/go-auth/protobufs"
+    "github.com/stewbawka/go-auth/event_stream"
 )
 
 var (
@@ -49,6 +52,7 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (u *User) AfterSave(tx *gorm.DB) (err error) {
+    topic := "users"
     protobuf := &protobufs.User{
         Id: uint32(u.ID),
         FirstName: u.FirstName,
@@ -57,6 +61,20 @@ func (u *User) AfterSave(tx *gorm.DB) (err error) {
         UpdatedAt: timestamppb.Now(),
     }
     fmt.Println(protobuf)
+    protobufBytes, err := proto.Marshal(protobuf)
+    if err != nil {
+        return
+    }
+    msg := &sarama.ProducerMessage{
+        Topic: topic,
+        Value: sarama.ByteEncoder(protobufBytes),
+    }
+    partition, offset, err := event_stream.EventStreamConn.SendMessage(msg)
+    if err != nil {
+        return
+    }
+    fmt.Printf("Message is stored in topic(%s)/partition(%d)/offset(%d)\n", topic, partition, offset)
+
 
     return
 }

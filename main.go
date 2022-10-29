@@ -1,9 +1,9 @@
 package main
 
 import (
-    "fmt"
     "github.com/gin-gonic/gin"
     "github.com/stewbawka/go-auth/database"
+    "github.com/stewbawka/go-auth/event_stream"
     "github.com/stewbawka/go-auth/jwt"
     "github.com/stewbawka/go-auth/controllers"
     "github.com/gin-gonic/gin/binding"
@@ -11,20 +11,13 @@ import (
 )
 
 func notblank(fl validator.FieldLevel) bool {
-    fmt.Printf("validator")
     if val, ok := fl.Field().Interface().(*string); ok {
-        fmt.Printf("inside validator")
-        fmt.Printf("<Value:%d>\n", val)
         if val == nil {
-            fmt.Printf("there")
             return true
         }
         if *val == "" {
-            fmt.Printf("here")
             return false
         }
-    } else {
-        fmt.Printf("unable to cast")
     }
     return true
 }
@@ -33,6 +26,10 @@ func main() {
     database.Connect()
     defer database.Close()
     database.Migrate()
+
+    event_stream.Connect()
+    defer event_stream.EventStreamConn.Close()
+
     jwt.LoadKeypair("/jwt-keypairs")
 
     r := gin.Default()
