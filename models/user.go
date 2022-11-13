@@ -2,6 +2,7 @@ package models
 
 import (
     "fmt"
+    "strconv"
     "time"
     "gorm.io/gorm"
     "crypto/rand"
@@ -52,9 +53,10 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (u *User) AfterSave(tx *gorm.DB) (err error) {
-    topic := "users"
+    topic := "play.go_auth.users.user_saved"
+    id := uint32(u.ID)
     protobuf := &protobufs.User{
-        Id: uint32(u.ID),
+        Id: id,
         FirstName: u.FirstName,
         LastName: u.LastName,
         CreatedAt: timestamppb.Now(),
@@ -65,8 +67,10 @@ func (u *User) AfterSave(tx *gorm.DB) (err error) {
     if err != nil {
         return
     }
+    fmt.Println(id)
     msg := &sarama.ProducerMessage{
         Topic: topic,
+        Key: sarama.StringEncoder(strconv.Itoa(int(id))),
         Value: sarama.ByteEncoder(protobufBytes),
     }
     partition, offset, err := event_stream.EventStreamConn.SendMessage(msg)
