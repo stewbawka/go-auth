@@ -65,7 +65,7 @@ func UpdateUser(c *gin.Context) {
     fmt.Println(c.Request.Header["Authorization"])
     fmt.Println("*************")
     fmt.Println("*************")
-    fmt.Println(c.Request.Header["x-jwt"])
+    fmt.Println(c.Request.Header["X-Jwt"])
     fmt.Println("*************")
     var user models.User
     if err := database.DBConn.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
