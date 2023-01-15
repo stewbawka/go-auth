@@ -2,7 +2,6 @@ package models
 
 import (
     "fmt"
-    "strconv"
     "time"
     "gorm.io/gorm"
     "crypto/rand"
@@ -12,6 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
     "errors"
     "github.com/Shopify/sarama"
+    "github.com/google/uuid"
     "strings"
     "crypto/subtle"
     "github.com/stewbawka/go-auth/protobufs"
@@ -32,7 +32,7 @@ type ArgonParams struct {
 }
 
 type User struct {
-    ID     uint   `json:"id" gorm:"primary_key"`
+    ID     DBUUID `json:"id" gorm:"primary_key;default:(UUID_TO_BIN(UUID()));"`
     Email string `json:"email"`
     FirstName string `json:"first_name"`
     LastName string `json:"last_name"`
@@ -41,6 +41,12 @@ type User struct {
     CreatedAt    time.Time `json:"created_at"`
     UpdatedAt    time.Time `json:"updated_at"`
 
+}
+
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	id, err := uuid.NewRandom()
+	u.ID = DBUUID(id)
+	return err
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
@@ -54,7 +60,7 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 
 func (u *User) AfterSave(tx *gorm.DB) (err error) {
     topic := "play.go_auth.users.user_saved"
-    id := uint32(u.ID)
+    id := u.ID.String()
     protobuf := &protobufs.User{
         Id: id,
         FirstName: u.FirstName,
@@ -62,7 +68,6 @@ func (u *User) AfterSave(tx *gorm.DB) (err error) {
         CreatedAt: timestamppb.Now(),
         UpdatedAt: timestamppb.Now(),
     }
-    fmt.Println(protobuf)
     protobufBytes, err := proto.Marshal(protobuf)
     if err != nil {
         return
@@ -70,7 +75,7 @@ func (u *User) AfterSave(tx *gorm.DB) (err error) {
     fmt.Println(id)
     msg := &sarama.ProducerMessage{
         Topic: topic,
-        Key: sarama.StringEncoder(strconv.Itoa(int(id))),
+        Key: sarama.StringEncoder(id),
         Value: sarama.ByteEncoder(protobufBytes),
     }
     partition, offset, err := event_stream.EventStreamConn.SendMessage(msg)
