@@ -33,13 +33,12 @@ func CreateToken(c *gin.Context) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Login Failed!"})
         return
     }
-
     if match, err := user.ComparePasswordAndHash(data.Password); err != nil || !match {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Login Failed!"})
         return
     }
 
-    token := models.Token{User: user}
+    token := models.Token{UserID: user.ID}
     database.DBConn.Create(&token)
 
     c.SetCookie("token", token.Token, 60*60*24, "/", "localhost", true, true)

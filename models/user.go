@@ -38,6 +38,7 @@ type User struct {
     LastName string `json:"last_name"`
     Password string `json:"-" gorm:"-"`
     HashedPassword string `json:"-"`
+    Tokens []Token `gorm:"constraint:OnDelete:CASCADE;"`
     CreatedAt    time.Time `json:"created_at"`
     UpdatedAt    time.Time `json:"updated_at"`
 

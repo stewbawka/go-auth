@@ -20,7 +20,13 @@ func FindUsers(c *gin.Context) {
 
 func FindUser(c *gin.Context) {
     var user models.User
-    if err := database.DBConn.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
+    userUUID, err := models.StringToDBUUID(c.Param("id"))
+    if  err !=nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+        return
+    }
+
+    if err := database.DBConn.Where("id = ?", userUUID).First(&user).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
         return
     }
@@ -67,8 +73,13 @@ func UpdateUser(c *gin.Context) {
     fmt.Println("*************")
     fmt.Println(c.Request.Header["X-Jwt"])
     fmt.Println("*************")
+    userUUID, err := models.StringToDBUUID(c.Param("id"))
+    if  err !=nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+        return
+    }
     var user models.User
-    if err := database.DBConn.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
+    if err := database.DBConn.Where("id = ?", userUUID).First(&user).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
         return
     }
@@ -97,8 +108,13 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
+    userUUID, err := models.StringToDBUUID(c.Param("id"))
+    if  err !=nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+        return
+    }
     var user models.User
-    if err := database.DBConn.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
+    if err := database.DBConn.Where("id = ?", userUUID).First(&user).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
         return
     }
