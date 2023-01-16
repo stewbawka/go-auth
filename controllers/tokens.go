@@ -38,8 +38,8 @@ func CreateToken(c *gin.Context) {
         return
     }
 
-    token := models.Token{UserID: user.ID}
-    database.DBConn.Create(&token)
+    token := models.Token{UserID: user.ID, User: user}
+    database.DBConn.Omit("User").Create(&token)
 
     c.SetCookie("token", token.Token, 60*60*24, "/", "localhost", true, true)
     c.JSON(http.StatusCreated, gin.H{"data": token})

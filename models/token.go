@@ -13,9 +13,9 @@ var (
 )
 
 type Token struct {
-    ID     DBUUID `json:"id" gorm:"primary_key;default:(UUID_TO_BIN(UUID()));"`
+    ID     DBUUID `json:"id" gorm:"primaryKey;default:(UUID_TO_BIN(UUID()));"`
     UserID DBUUID `json:"user_id"`
-    User User `json:"user" gorm:foreignKey:UserId`
+    User User `json:"user" gorm:"foreignKey:UserID"`
     Token string `json:"token"`
     InvalidatedAt time.Time `json:"invalidated_at" gorm:"default:null"`
     CreatedAt    time.Time `json:"created_at"`
@@ -33,6 +33,7 @@ func (t *Token) BeforeSave(tx *gorm.DB) (err error) {
     if err != nil {
         return err
     }
+
     t.Token, err = jwt.CreateToken(t.User.Email, TokenTTL, string(payload))
     return err
 }
