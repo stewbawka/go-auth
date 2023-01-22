@@ -64,6 +64,7 @@ func (u *User) AfterSave(tx *gorm.DB) (err error) {
     id := u.ID.String()
     protobuf := &protobufs.User{
         Id: id,
+        Email: u.Email,
         FirstName: u.FirstName,
         LastName: u.LastName,
         CreatedAt: timestamppb.Now(),
